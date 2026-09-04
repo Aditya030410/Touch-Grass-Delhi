@@ -1,0 +1,765 @@
+<!DOCTYPE html><html lang="en"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TOUCH GRASS | STUDENT HACKATHON</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+    <meta name="view-transition" content="same-origin">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Archivo:wght@900&family=JetBrains+Mono:wght@700&display=swap');
+
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #1a1a1a;
+            --text-primary: #ffffff;
+            --accent-neon: #84cc16;
+            --industrial-gray: #666666;
+            --snap-ease: cubic-bezier(0.85, 0, 0.15, 1);
+        }
+
+        * {
+            border-radius: 0 !important;
+            cursor: none !important;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: 'Archivo', sans-serif;
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+
+        .mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* CRT Effect */
+        .crt-overlay {
+            position: fixed;
+            inset: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+            background-size: 100% 2px, 2px 100%;
+            pointer-events: none;
+            z-index: 1000;
+            opacity: 0.1;
+            animation: flicker 0.15s infinite;
+        }
+
+        @keyframes flicker {
+            0% { opacity: 0.08; } 50% { opacity: 0.12; } 100% { opacity: 0.08; }
+        }
+
+        /* Custom Cursor */
+        #cursor {
+            position: fixed;
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--accent-neon);
+            background: transparent;
+            pointer-events: none;
+            z-index: 9999;
+            transform: translate(-50%, -50%);
+            transition: width 0.1s var(--snap-ease), height 0.1s var(--snap-ease), background 0.1s var(--snap-ease);
+        }
+
+        body:active #cursor {
+            width: 50px;
+            height: 50px;
+            background: rgba(132, 204, 22, 0.1);
+        }
+
+        /* Grid Background */
+        .grid-pattern {
+            background-image: linear-gradient(var(--industrial-gray) 1px, transparent 1px), linear-gradient(90deg, var(--industrial-gray) 1px, transparent 1px);
+            background-size: 40px 40px;
+            opacity: 0.1;
+        }
+
+        /* Glitch Text */
+        .glitch-text {
+            position: relative;
+            display: inline-block;
+            transition: transform 0.2s var(--snap-ease);
+        }
+
+        .glitch-text:hover {
+            animation: glitch-anim 0.2s infinite;
+            color: var(--accent-neon);
+        }
+
+        @keyframes glitch-anim {
+            0% { transform: translate(0); } 20% { transform: translate(-3px, 3px); } 40% { transform: translate(-3px, -3px); } 60% { transform: translate(3px, 3px); } 80% { transform: translate(3px, -3px); } 100% { transform: translate(0); }
+        }
+
+        .snappy-show {
+            opacity: 0;
+            transform: translateY(50px);
+            transition: opacity 0.6s var(--snap-ease), transform 0.6s var(--snap-ease);
+        }
+
+        .snappy-show.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .btn-brutal {
+            position: relative;
+            border: 4px solid currentColor;
+            padding: 1.2rem 2.5rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            transition: all 0.1s var(--snap-ease);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-brutal:hover {
+            transform: translate(-6px, -6px);
+            box-shadow: 6px 6px 0 var(--accent-neon);
+        }
+
+        .team-card {
+            transition: transform 0.3s var(--snap-ease);
+            perspective: 1000px;
+        }
+
+        .team-card:hover {
+            transform: rotateY(8deg) rotateX(-8deg);
+            z-index: 10;
+        }
+
+        .locked-stripes {
+            background: repeating-linear-gradient(45deg, #111, #111 10px, #000 10px, #000 20px);
+        }
+
+        details summary::-webkit-details-marker { display: none; }
+
+        /* Timeline Specialized Styles */
+        .timeline-line-active {
+            height: 0%;
+            transition: height 0.3s linear;
+        }
+
+        .major-glow {
+            box-shadow: 0 0 40px -10px var(--accent-neon);
+        }
+
+        .major-glow-red {
+            box-shadow: 0 0 40px -10px #ef4444;
+        }
+
+        .journey-step {
+            opacity: 0.3;
+            transition: all 0.4s var(--snap-ease);
+        }
+
+        .journey-step.active {
+            opacity: 1;
+            color: var(--accent-neon);
+        }
+    </style>
+</head>
+<body>
+
+<div class="min-h-screen relative" data-sd-id="1">
+    <div class="crt-overlay" data-sd-id="2"></div>
+
+    <!-- Sponsor Modal -->
+    <div id="sponsor-modal" class="fixed inset-0 z-[5000] bg-black/95 flex items-center justify-center p-4 transition-all duration-300 opacity-0 pointer-events-none">
+        <div class="relative bg-black border-4 border-[#84cc16] p-8 md:p-12 max-w-2xl w-full shadow-[20px_20px_0_#84cc16] transform transition-transform duration-300 scale-95" id="sponsor-modal-content">
+            <!-- Close Button -->
+            <button id="close-sponsor-modal" class="absolute top-4 right-4 text-white hover:text-[#84cc16] text-4xl font-black leading-none bg-transparent w-10 h-10 flex items-center justify-center transition-colors">&times;</button>
+            
+            <div class="mono text-[#84cc16] text-sm mb-4 tracking-widest animate-pulse">[ INCOMING_TRANSMISSION ]</div>
+            <h2 class="text-4xl md:text-5xl font-black uppercase italic tracking-tighter mb-2">WANT TO HELP US TOUCH GRASS?</h2>
+            <p class="text-xl md:text-2xl font-bold opacity-80 mb-10">Interested in sponsoring TOUCH GRASS? Let's talk.</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10 border-t-2 border-b-2 border-industrial-gray py-8">
+                <div>
+                    <div class="mono text-xs opacity-50 mb-1">ORGANIZER</div>
+                    <div class="text-2xl font-black uppercase">Aditya & Adarsh</div>
+                </div>
+                <div>
+                    <div class="mono text-xs opacity-50 mb-1">EMAIL</div>
+                    <a href="mailto:touchgrasshackathon@gmail.com" class="text-lg md:text-xl font-black hover:text-[#84cc16] transition-colors break-all">touchgrasshackathon@gmail.com</a>
+                </div>
+                <div>
+                    <div class="mono text-xs opacity-50 mb-1">PHONE / WHATSAPP</div>
+                    <div class="text-xl font-black">8920929233<br>9354232874</div>
+                </div>
+                <div>
+                    <div class="mono text-xs opacity-50 mb-1">INSTAGRAM</div>
+                    <a href="https://instagram.com/touchgrassdelhi" target="_blank" class="text-xl font-black hover:text-[#84cc16] transition-colors">@touchgrassdelhi</a>
+                </div>
+            </div>
+            
+            <div class="flex flex-col md:flex-row gap-4">
+                <a href="mailto:touchgrasshackathon@gmail.com" class="flex-1 border-4 border-[#84cc16] bg-[#84cc16] text-black font-black uppercase py-4 px-6 text-center hover:bg-black hover:text-[#84cc16] transition-colors">EMAIL US &rarr;</a>
+                <a href="https://wa.me/918920929233" target="_blank" class="flex-1 border-4 border-white bg-transparent text-white font-black uppercase py-4 px-6 text-center hover:bg-white hover:text-black transition-colors">WHATSAPP US &rarr;</a>
+            </div>
+        </div>
+    </div>
+    
+    <div id="cursor" data-sd-id="3"></div>
+
+    <!-- 1. NAVIGATION -->
+    <nav class="fixed top-0 left-0 w-full z-[100] bg-black border-b-4 border-white px-8 py-4 flex justify-between items-center" data-sd-id="4">
+        <a href="#" id="nav-logo-link" class="text-2xl md:text-3xl font-black tracking-tighter hover:text-[#84cc16] transition-colors" data-sd-id="5">TOUCH GRASS.</a>
+        <div class="hidden md:flex gap-10 mono text-xs uppercase items-center" data-sd-id="6">
+            <a href="#about" id="nav-about-link" class="hover:text-[#84cc16] transition-colors" data-sd-id="7">ABOUT</a>
+            <a href="#works" id="nav-works-link" class="hover:text-[#84cc16] transition-colors" data-sd-id="8">HOW IT WORKS</a>
+            <a href="#schedule" id="nav-schedule-link" class="hover:text-[#84cc16] transition-colors" data-sd-id="9">SCHEDULE</a>
+            <a href="#problems" id="nav-problems-link" class="hover:text-[#84cc16] transition-colors" data-sd-id="10">PROBLEMS</a>
+            <a href="https://docs.google.com/forms/d/e/1FAIpQLScF8G5HjINZx5b4ulPnZ7N5Ly30h4t9xGdVaWk2UocRqsythg/viewform?usp=dialog" target="_blank" rel="noopener noreferrer" id="nav-register-link" class="bg-white text-black px-6 py-2 hover:bg-[#84cc16] transition-colors" data-sd-id="11">REGISTER</a>
+        </div>
+    </nav>
+
+    <!-- 2. HERO SECTION -->
+    <section id="hero" class="relative h-screen flex items-center justify-center pt-20 overflow-hidden" data-sd-id="12">
+        <div class="absolute inset-0 grid-pattern" data-sd-id="13"></div>
+        <div class="container mx-auto px-8 relative z-10 text-center" data-sd-id="14">
+            <p class="mono text-[#84cc16] text-sm mb-6 tracking-[0.3em] snappy-show" data-sd-id="15">[ STUDENT_ORGANIZED_INITIATIVE ]</p>
+            <h1 id="hero-title" class="glitch-text leading-[0.85] mb-8 select-none" data-sd-id="16">
+                <span class="block text-[15vw] md:text-[18vw] font-black tracking-tighter uppercase" data-text="TOUCH GRASS" data-sd-id="17">TOUCH<br>GRASS</span>
+            </h1>
+            <p class="text-xl md:text-2xl font-black uppercase mb-12 snappy-show" data-sd-id="18">A ONE-DAY SOFTWARE HACKATHON FOR SCHOOL STUDENTS.<br><span class="text-[#84cc16]">01 NOVEMBER 2026</span></p>
+            
+            <div class="border-y-2 border-industrial-gray py-6 flex flex-wrap justify-center gap-x-12 gap-y-4 mono text-xs md:text-sm mb-12 bg-black/50 backdrop-blur-sm snappy-show" data-sd-id="19">
+                <span data-sd-id="20">01 NOVEMBER 2026</span><span data-sd-id="21">10:00 AM – 7:00 PM</span><span class="text-[#84cc16]" data-sd-id="22">CM SHRI SURAJMAL VIHAR</span>
+            </div>
+
+            <div class="flex flex-col md:flex-row justify-center gap-6 snappy-show" data-sd-id="25">
+                <a href="https://docs.google.com/forms/d/e/1FAIpQLScF8G5HjINZx5b4ulPnZ7N5Ly30h4t9xGdVaWk2UocRqsythg/viewform?usp=dialog" target="_blank" rel="noopener noreferrer" id="hero-cta-reg-link" class="btn-brutal text-white" data-sd-id="26">TOUCH GRASS → REGISTER</a>
+                <a href="#about" id="hero-cta-info-link" class="btn-brutal text-industrial-gray border-industrial-gray hover:text-white" data-sd-id="27">SEE HOW IT WORKS ↓</a>
+            </div>
+        </div>
+        <svg class="absolute bottom-0 left-0 w-64 h-64 opacity-20 pointer-events-none" viewBox="0 0 200 200" data-sd-id="28"><path d="M0,200 C50,150 20,100 80,50 S150,20 200,0" fill="none" stroke="#84cc16" stroke-width="4"></path></svg>
+        <svg class="absolute top-0 right-0 w-96 h-96 opacity-20 pointer-events-none rotate-180" viewBox="0 0 200 200" data-sd-id="29"><path d="M0,200 C80,180 50,20 200,0" fill="none" stroke="#84cc16" stroke-width="4"></path></svg>
+    </section>
+
+    <!-- 3. ABOUT SECTION -->
+    <section id="about" class="bg-white text-black py-32 px-8 md:px-16" data-sd-id="30">
+        <div class="max-w-7xl mx-auto" data-sd-id="31">
+            <h2 class="text-6xl md:text-9xl font-black italic uppercase leading-[0.85] mb-20 tracking-tighter snappy-show" data-sd-id="32">SO... WHAT IS<br>TOUCH GRASS?</h2>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-20" data-sd-id="33">
+                <div class="space-y-8 text-2xl md:text-3xl font-bold uppercase snappy-show" data-sd-id="34">
+                    <p data-sd-id="35">TOUCH GRASS IS A HARDCORE STUDENT HACKATHON CHALLENGING YOU TO BUILD REAL SOLUTIONS IN RECORD TIME.</p>
+                    <p data-sd-id="36">WE STRIP AWAY THE FLUFF. NO CORPORATE SLOGANS. NO PRE-WRITTEN CODE. JUST YOU, YOUR TEAM, AND A PROBLEM YOU DIDN'T SEE COMING.</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mono snappy-show" data-sd-id="37">
+                    <div class="border-4 border-black p-6 hover:bg-[#84cc16] transition-all flex items-center gap-4" data-sd-id="38">
+                        <iconify-icon icon="lucide:lock" class="text-3xl"></iconify-icon><span class="font-black uppercase" data-sd-id="39">REVEAL</span>
+                    </div>
+                    <div class="border-4 border-black p-6 hover:bg-[#84cc16] transition-all flex items-center gap-4" data-sd-id="40">
+                        <iconify-icon icon="lucide:brain" class="text-3xl"></iconify-icon><span class="font-black uppercase" data-sd-id="41">THINK</span>
+                    </div>
+                    <div class="border-4 border-black p-6 hover:bg-[#84cc16] transition-all flex items-center gap-4" data-sd-id="42">
+                        <iconify-icon icon="lucide:code" class="text-3xl"></iconify-icon><span class="font-black uppercase" data-sd-id="43">BUILD</span>
+                    </div>
+                    <div class="border-4 border-black p-6 hover:bg-[#84cc16] transition-all flex items-center gap-4" data-sd-id="44">
+                        <iconify-icon icon="lucide:check-circle" class="text-3xl"></iconify-icon><span class="font-black uppercase" data-sd-id="45">FINALIZE</span>
+                    </div>
+                    <div class="border-4 border-black p-6 hover:bg-[#84cc16] transition-all flex items-center gap-4" data-sd-id="46">
+                        <iconify-icon icon="lucide:send" class="text-3xl"></iconify-icon><span class="font-black uppercase" data-sd-id="47">SUBMIT</span>
+                    </div>
+                    <div class="border-4 border-black p-6 hover:bg-[#84cc16] transition-all flex items-center gap-4" data-sd-id="48">
+                        <iconify-icon icon="lucide:trophy" class="text-3xl"></iconify-icon><span class="font-black uppercase" data-sd-id="49">JUDGE</span>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-32 pt-20 border-t-8 border-black snappy-show" data-sd-id="50">
+                <p class="text-4xl md:text-7xl font-black italic uppercase leading-none tracking-tighter" data-sd-id="51">
+                    YOU DON'T PREPARE FOR THE PROBLEM. YOU PREPARE TO SOLVE IT.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- 4. MISSION SEQUENCE -->
+    <section id="works" class="py-32 px-8 md:px-16 bg-black relative overflow-hidden" data-sd-id="52">
+        <div class="absolute inset-0 grid-pattern opacity-5" data-sd-id="53"></div>
+        <div class="max-w-7xl mx-auto relative z-10" data-sd-id="54">
+            <div class="inline-block px-6 py-2 border-4 border-[#84cc16] mono text-sm mb-16 snappy-show" data-sd-id="55">// MISSION_SEQUENCE</div>
+            <div class="grid grid-cols-1 md:grid-cols-3 border-4 border-industrial-gray" data-sd-id="56">
+                <div class="p-12 border-industrial-gray border-b-4 md:border-b-0 md:border-r-4 hover:bg-white hover:text-black group transition-all snappy-show" data-sd-id="57">
+                    <span class="mono text-4xl font-black opacity-20 block group-hover:opacity-100" data-sd-id="58">01</span>
+                    <h3 class="text-3xl font-black uppercase my-6" data-sd-id="59">SHOW UP</h3>
+                    <p class="mono text-sm opacity-60" data-sd-id="60">REPORT TO CM SHRI SURAJMAL VIHAR. BRING YOUR GEAR AND FOCUS.</p>
+                </div>
+                <div class="p-12 border-industrial-gray border-b-4 md:border-b-0 md:border-r-4 hover:bg-[#84cc16] hover:text-black group transition-all snappy-show" data-sd-id="61">
+                    <span class="mono text-4xl font-black opacity-20 block group-hover:opacity-100" data-sd-id="62">02</span>
+                    <h3 class="text-3xl font-black uppercase my-6" data-sd-id="63">PROBLEM DROP</h3>
+                    <p class="mono text-sm opacity-60" data-sd-id="64">THE BIG REVEAL. THE CLOCK STARTS TICKING IMMEDIATELY.</p>
+                </div>
+                <div class="p-12 hover:bg-white hover:text-black group transition-all snappy-show" data-sd-id="65">
+                    <span class="mono text-4xl font-black opacity-20 block group-hover:opacity-100" data-sd-id="66">03</span>
+                    <h3 class="text-3xl font-black uppercase my-6" data-sd-id="67">THINK</h3>
+                    <p class="mono text-sm opacity-60" data-sd-id="68">ARCHITECT YOUR SOLUTION. NO GOOGLE-READY ANSWERS HERE.</p>
+                </div>
+                <div class="p-12 border-t-4 border-industrial-gray border-b-4 md:border-b-0 md:border-r-4 hover:bg-[#84cc16] hover:text-black group transition-all snappy-show" data-sd-id="69">
+                    <span class="mono text-4xl font-black opacity-20 block group-hover:opacity-100" data-sd-id="70">04</span>
+                    <h3 class="text-3xl font-black uppercase my-6" data-sd-id="71">BUILD</h3>
+                    <p class="mono text-sm opacity-60" data-sd-id="72">COFFEE-FUELED PURE DEVELOPMENT. MAKE IT WORK.</p>
+                </div>
+                <div class="p-12 border-t-4 border-industrial-gray border-b-4 md:border-b-0 md:border-r-4 hover:bg-white hover:text-black group transition-all snappy-show" data-sd-id="73">
+                    <span class="mono text-4xl font-black opacity-20 block group-hover:opacity-100" data-sd-id="74">05</span>
+                    <h3 class="text-3xl font-black uppercase my-6" data-sd-id="75">SUBMIT</h3>
+                    <p class="mono text-sm opacity-60" data-sd-id="76">PUSH YOUR FINAL REPO. NO EXTENSIONS. NO EXCUSES.</p>
+                </div>
+                <div class="p-12 border-t-4 border-industrial-gray hover:bg-[#84cc16] hover:text-black group transition-all snappy-show" data-sd-id="77">
+                    <span class="mono text-4xl font-black opacity-20 block group-hover:opacity-100" data-sd-id="78">06</span>
+                    <h3 class="text-3xl font-black uppercase my-6" data-sd-id="79">RESULTS</h3>
+                    <p class="mono text-sm opacity-60" data-sd-id="80">DEMOS. JUDGING. GLORY FOR THE FASTEST ARCHITECTS.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 5. EXPECT SECTION -->
+    <section id="expect" class="py-32 bg-[#1a1a1a] px-8 md:px-16" data-sd-id="81">
+        <div class="max-w-7xl mx-auto" data-sd-id="82">
+            <h2 class="text-6xl md:text-8xl font-black italic uppercase mb-24 tracking-tighter snappy-show" data-sd-id="83">YOU HAVE HOURS.<br>MAKE THEM COUNT.</h2>
+            <div class="grid grid-cols-1 md:grid-cols-5 gap-4 snappy-show" data-sd-id="84">
+                <div class="border-2 border-industrial-gray p-8 bg-black hover:border-white transition-all" data-sd-id="85">
+                    <iconify-icon icon="lucide:laptop" class="text-4xl text-[#84cc16] mb-6"></iconify-icon>
+                    <h4 class="text-xl font-black mb-4 uppercase" data-sd-id="86">BUILDING</h4>
+                    <p class="mono text-xs opacity-50 uppercase" data-sd-id="87">FULL CONSTRUCTION FROM SCRATCH.</p>
+                </div>
+                <div class="border-2 border-industrial-gray p-8 bg-black hover:border-white transition-all" data-sd-id="88">
+                    <iconify-icon icon="lucide:zap" class="text-4xl text-white mb-6"></iconify-icon>
+                    <h4 class="text-xl font-black mb-4 uppercase" data-sd-id="89">SOLVING</h4>
+                    <p class="mono text-xs opacity-50 uppercase" data-sd-id="90">SECRET CHALLENGES UNTIL START.</p>
+                </div>
+                <div class="border-2 border-industrial-gray p-8 bg-black hover:border-white transition-all" data-sd-id="91">
+                    <iconify-icon icon="lucide:timer" class="text-4xl text-[#84cc16] mb-6"></iconify-icon>
+                    <h4 class="text-xl font-black mb-4 uppercase" data-sd-id="92">PRESSURE</h4>
+                    <p class="mono text-xs opacity-50 uppercase" data-sd-id="93">EIGHT HOURS OF HIGH DURESS.</p>
+                </div>
+                <div class="border-2 border-industrial-gray p-8 bg-black hover:border-white transition-all" data-sd-id="94">
+                    <iconify-icon icon="lucide:upload-cloud" class="text-4xl text-white mb-6"></iconify-icon>
+                    <h4 class="text-xl font-black mb-4 uppercase" data-sd-id="95">SUBMISSION</h4>
+                    <p class="mono text-xs opacity-50 uppercase" data-sd-id="96">LOCKED REPOS AT 01:00 PM.</p>
+                </div>
+                <div class="border-2 border-industrial-gray p-8 bg-black hover:border-white transition-all" data-sd-id="97">
+                    <iconify-icon icon="lucide:target" class="text-4xl text-[#84cc16] mb-6"></iconify-icon>
+                    <h4 class="text-xl font-black mb-4 uppercase" data-sd-id="98">RESULTS</h4>
+                    <p class="mono text-xs opacity-50 uppercase" data-sd-id="99">EXPERT PANEL EVALUATION.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 6. ORGANIZING TEAM -->
+    <section id="team" class="py-32 px-8 md:px-16 bg-[#0a0a0a]" data-sd-id="100">
+        <div class="max-w-7xl mx-auto" data-sd-id="101">
+            <div class="flex flex-col md:flex-row gap-8 justify-center mb-24 snappy-show">
+                <div id="founder" class="flex-1 max-w-md border-4 border-white p-12 text-center" data-sd-id="102">
+                    <div class="w-52 h-52 mx-auto border-4 border-[#84cc16] mb-8 overflow-hidden">
+                        <img src="aditya.png" alt="Aditya Jain" class="w-full h-full object-cover" style="object-position: center 22%;" />
+                    </div>
+
+                    <h3 class="text-5xl font-black uppercase mb-2" data-sd-id="106">ADITYA JAIN</h3>
+
+                    <p class="mono italic text-sm opacity-80" data-sd-id="108">"STARTED TOUCH GRASS BECAUSE APPARENTLY ORGANIZING A HACKATHON WASN'T ENOUGH WORK."</p>
+                </div>
+                <div class="flex-1 max-w-md border-4 border-[#84cc16] p-12 text-center bg-black">
+                    <div class="w-52 h-52 mx-auto border-4 border-white mb-8 overflow-hidden">
+                        <img src="adarsh.png" alt="Adarsh" class="w-full h-full object-cover object-top" />
+                    </div>
+                    <div class="mono text-[#84cc16] text-xs mb-2">CO-LEAD ORGANIZER</div>
+                    <h3 class="text-5xl font-black uppercase mb-2">ADARSH</h3>
+                    <div class="mono text-sm tracking-widest mb-6 opacity-60">LEAD ORG</div>
+                    <p class="mono italic text-sm opacity-80">"THE ONE WHO KEEPS IT ALL TOGETHER."</p>
+                </div>
+            </div>
+            <div class="text-center mb-20 snappy-show" data-sd-id="109">
+                <h2 class="text-5xl md:text-7xl font-black italic uppercase leading-tight tracking-tighter mb-4" data-sd-id="110">THE PEOPLE WHO THOUGHT THIS WAS A GOOD IDEA</h2>
+                <p class="text-xl italic opacity-60" data-sd-id="111">MEET THE STUDENTS BEHIND TOUCH GRASS.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 snappy-show" data-sd-id="112">
+                
+                <div class="team-card bg-[#1a1a1a] border-4 border-white p-8">
+                    <h4 class="text-2xl font-black uppercase mb-1">ADITYA GOSWAMI</h4>
+                    <p class="mono text-[#84cc16] text-xs font-bold">LEAD TEAM</p>
+                </div>
+                <div class="team-card bg-black border-4 border-industrial-gray p-8">
+                    <h4 class="text-2xl font-black uppercase mb-1">MAANVIKA</h4>
+                    <p class="mono text-white text-xs font-bold">CORE TEAM</p>
+                </div>
+                <div class="team-card bg-[#1a1a1a] border-4 border-white p-8">
+                    <h4 class="text-2xl font-black uppercase mb-1">TEAM MEMBER 03</h4>
+                    <p class="mono text-[#84cc16] text-xs font-bold">CORE TEAM</p>
+                </div>
+                <div class="team-card bg-black border-4 border-[#84cc16] p-8">
+                    <h4 class="text-2xl font-black uppercase mb-1">TEAM MEMBER 04</h4>
+                    <p class="mono text-white text-xs font-bold">CORE TEAM</p>
+                </div>
+                <div class="team-card bg-[#1a1a1a] border-4 border-white p-8">
+                    <h4 class="text-2xl font-black uppercase mb-1">TEAM MEMBER 05</h4>
+                    <p class="mono text-[#84cc16] text-xs font-bold">CORE TEAM</p>
+                </div>
+                <div class="team-card bg-black border-4 border-industrial-gray p-8">
+                    <h4 class="text-2xl font-black uppercase mb-1">TEAM MEMBER 06</h4>
+                    <p class="mono text-white text-xs font-bold">CORE TEAM</p>
+                </div>
+            </div>
+
+            <div class="text-center mt-32 snappy-show" data-sd-id="128">
+                <p class="text-5xl md:text-7xl font-black italic uppercase leading-none tracking-tighter" data-sd-id="129">
+                    BUILT BY STUDENTS.<br>FOR STUDENTS.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- 7. MISSION TIMELINE (SCHEDULE) -->
+    <section id="schedule" class="py-32 bg-black px-8 md:px-16 relative overflow-hidden" data-sd-id="130">
+        <div class="absolute inset-0 grid-pattern opacity-5" data-sd-id="131"></div>
+        <div class="max-w-6xl mx-auto relative z-10" data-sd-id="132">
+            <div class="text-center mb-24" data-sd-id="133">
+                <h3 class="text-6xl md:text-8xl font-black italic uppercase tracking-tighter mb-12 snappy-show" data-sd-id="134">MISSION_TIMELINE</h3>
+                
+                <!-- Journey Visual Progression -->
+                <div class="hidden md:flex justify-between items-center max-w-4xl mx-auto mb-16 mono text-[10px] tracking-widest" data-sd-id="135">
+                    <span class="journey-step active" data-sd-id="136">ARRIVE</span>
+                    <iconify-icon icon="lucide:chevron-right"></iconify-icon>
+                    <span class="journey-step" data-sd-id="137">REVEAL</span>
+                    <iconify-icon icon="lucide:chevron-right"></iconify-icon>
+                    <span class="journey-step" data-sd-id="138">BUILD</span>
+                    <iconify-icon icon="lucide:chevron-right"></iconify-icon>
+                    <span class="journey-step" data-sd-id="139">BREAK</span>
+                    <iconify-icon icon="lucide:chevron-right"></iconify-icon>
+                    <span class="journey-step" data-sd-id="140">CHECK</span>
+                    <iconify-icon icon="lucide:chevron-right"></iconify-icon>
+                    <span class="journey-step" data-sd-id="141">SUBMIT</span>
+                    <iconify-icon icon="lucide:chevron-right"></iconify-icon>
+                    <span class="journey-step" data-sd-id="142">WIN</span>
+                </div>
+            </div>
+
+            <div class="relative pb-24" data-sd-id="143">
+                <!-- Main Vertical Timeline Line -->
+                <div class="absolute left-1/2 -translate-x-1/2 top-0 bottom-0 w-1 bg-industrial-gray/30" data-sd-id="144">
+                    <div id="timeline-progress" class="w-full bg-[#84cc16] timeline-line-active" data-sd-id="145"></div>
+                </div>
+
+                <!-- Timeline Items -->
+                <div class="space-y-32" data-sd-id="146">
+                    
+                    <!-- 1. Registration -->
+                    <div class="relative flex flex-col md:flex-row items-center gap-12 snappy-show" data-sd-id="147">
+                        <div class="md:w-1/2 md:text-right" data-sd-id="148">
+                            <div class="mono text-xl md:text-2xl font-black text-industrial-gray" data-sd-id="149">9:00 – 9:30 AM</div>
+                            <h4 class="text-3xl font-black uppercase mt-2" data-sd-id="150">REGISTRATION &amp; CHECK-IN</h4>
+                            <p class="mono text-xs opacity-50 mt-4" data-sd-id="151">PARTICIPANTS ARRIVE, REGISTER, AND PREPARE GEAR.</p>
+                        </div>
+                        <div class="absolute left-1/2 -translate-x-1/2 w-3 h-3 bg-white border-2 border-black z-20 rotate-45" data-sd-id="152"></div>
+                        <div class="md:w-1/2" data-sd-id="153"></div>
+                    </div>
+
+                    <!-- 2. Opening -->
+                    <div class="relative flex flex-col md:flex-row items-center gap-12 snappy-show" data-sd-id="154">
+                        <div class="md:w-1/2" data-sd-id="155"></div>
+                        <div class="absolute left-1/2 -translate-x-1/2 w-3 h-3 bg-[#84cc16] border-2 border-black z-20 rotate-45" data-sd-id="156"></div>
+                        <div class="md:w-1/2" data-sd-id="157">
+                            <div class="mono text-xl md:text-2xl font-black text-industrial-gray" data-sd-id="158">9:30 – 10:00 AM</div>
+                            <h4 class="text-3xl font-black uppercase mt-2" data-sd-id="159">OPENING CEREMONY</h4>
+                            <p class="mono text-xs opacity-50 mt-4" data-sd-id="160">WELCOME, EVENT RULES, AND FORMAT INTRODUCTION.</p>
+                        </div>
+                    </div>
+
+                    <!-- 3. REVEAL (MAJOR MOMENT) -->
+                    <div class="relative flex flex-col md:flex-row items-center gap-12 snappy-show" data-sd-id="161">
+                        <div class="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-6 h-6 bg-[#84cc16] border-4 border-black z-20 shadow-[0_0_20px_#84cc16] rotate-45" data-sd-id="162"></div>
+                        <div class="w-full flex justify-center" data-sd-id="163">
+                            <div class="max-w-2xl bg-black border-4 border-[#84cc16] p-12 text-center major-glow relative overflow-hidden" data-sd-id="164">
+                                <div class="mono text-[#84cc16] text-sm mb-4 tracking-widest" data-sd-id="165">[ MISSION_OBJECTIVE_DROP ]</div>
+                                <div class="mono text-2xl font-black mb-4" data-sd-id="166">10:00 – 10:20 AM</div>
+                                <h4 class="text-4xl md:text-6xl font-black uppercase mb-6" data-sd-id="167">PROBLEM STATEMENT REVEAL</h4>
+                                <p class="text-xl md:text-2xl font-black italic text-white uppercase" data-sd-id="168">THE CHALLENGE IS FINALLY REVEALED. YOU'VE WAITED. NOW YOU KNOW WHAT YOU'RE BUILDING.</p>
+                                <svg class="absolute top-0 right-0 w-32 h-32 opacity-10" viewBox="0 0 100 100" data-sd-id="169"><path d="M0,100 Q30,70 60,80 T100,20" fill="none" stroke="#84cc16" stroke-width="2"></path></svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 4. Build Round 1 -->
+                    <div class="relative flex flex-col md:flex-row items-center gap-12 snappy-show" data-sd-id="170">
+                        <div class="md:w-1/2 md:text-right" data-sd-id="171">
+                            <div class="mono text-xl md:text-2xl font-black text-industrial-gray" data-sd-id="172">10:30 AM – 1:00 PM</div>
+                            <h4 class="text-3xl font-black uppercase mt-2" data-sd-id="173">BUILD — ROUND 1</h4>
+                            <p class="mono text-xs opacity-50 mt-4" data-sd-id="174">BRAINSTORM, PLAN, DESIGN AND START BUILDING SOLUTIONS.</p>
+                        </div>
+                        <div class="absolute left-1/2 -translate-x-1/2 w-3 h-3 bg-white border-2 border-black z-20 rotate-45" data-sd-id="175"></div>
+                        <div class="md:w-1/2" data-sd-id="176"></div>
+                    </div>
+
+                    <!-- 5. Break -->
+                    <div class="relative flex flex-col md:flex-row items-center gap-12 snappy-show" data-sd-id="177">
+                        <div class="md:w-1/2" data-sd-id="178"></div>
+                        <div class="absolute left-1/2 -translate-x-1/2 w-3 h-3 bg-[#84cc16] border-2 border-black z-20 rotate-45" data-sd-id="179"></div>
+                        <div class="md:w-1/2" data-sd-id="180">
+                            <div class="mono text-xl md:text-2xl font-black text-industrial-gray" data-sd-id="181">1:00 – 2:00 PM</div>
+                            <h4 class="text-3xl font-black uppercase mt-2" data-sd-id="182">BREAK</h4>
+                            <p class="mono text-xs opacity-50 mt-4" data-sd-id="183">MANDATORY EYES-OFF-SCREEN RESET PHASE.</p>
+                        </div>
+                    </div>
+
+                    <!-- 6. Build Round 2 -->
+                    <div class="relative flex flex-col md:flex-row items-center gap-12 snappy-show">
+                        <div class="md:w-1/2 md:text-right">
+                            <div class="mono text-xl md:text-2xl font-black text-industrial-gray">2:00 – 5:00 PM</div>
+                            <h4 class="text-3xl font-black uppercase mt-2">BUILD — ROUND 2</h4>
+                            <p class="mono text-xs opacity-50 mt-4">PUSH HARDER. REFINE, DEBUG, AND SHIP.</p>
+                        </div>
+                        <div class="absolute left-1/2 -translate-x-1/2 w-3 h-3 bg-white border-2 border-black z-20 rotate-45"></div>
+                        <div class="md:w-1/2"></div>
+                    </div>
+
+                    <!-- 7. SUBMISSIONS (MAJOR MOMENT) -->
+                    <div class="relative flex flex-col md:flex-row items-center gap-12 snappy-show" data-sd-id="184">
+                        <div class="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-6 h-6 bg-red-500 border-4 border-black z-20 shadow-[0_0_20px_#ef4444] rotate-45" data-sd-id="185"></div>
+                        <div class="w-full flex justify-center" data-sd-id="186">
+                            <div class="max-w-2xl bg-black border-4 border-red-500 p-12 text-center major-glow-red relative" data-sd-id="187">
+                                <div class="mono text-red-500 text-sm mb-4 tracking-widest animate-pulse" data-sd-id="188">[ WARNING: SYSTEM_LOCK_ENGAGING ]</div>
+                                <div class="mono text-2xl font-black text-red-400 mb-4" data-sd-id="189">5:00 PM</div>
+                                <h4 class="text-4xl md:text-6xl font-black uppercase text-red-500 mb-6" data-sd-id="190">FINAL SUBMISSIONS</h4>
+                                <p class="text-xl md:text-2xl font-black italic text-red-400 uppercase" data-sd-id="191">THE CLOCK STOPS. PROJECTS MUST BE SUBMITTED BY 5:00. NO EXTENSIONS.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 8. RESULTS (ULTIMATE MOMENT) -->
+                    <div class="relative flex flex-col md:flex-row items-center gap-12 snappy-show" data-sd-id="192">
+                        <div class="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 w-6 h-6 bg-white border-4 border-[#84cc16] z-20 shadow-[0_0_30px_#84cc16] rotate-45" data-sd-id="193"></div>
+                        <div class="w-full flex justify-center" data-sd-id="194">
+                            <div class="max-w-3xl bg-white text-black p-16 text-center border-t-8 border-l-8 border-black shadow-[20px_20px_0_#84cc16] relative" data-sd-id="195">
+                                <div class="mono text-xs font-black mb-6 tracking-widest" data-sd-id="196">[ MISSION_COMPLETE ]</div>
+                                <div class="mono text-3xl font-black mb-6" data-sd-id="197">7:00 – 8:00 PM</div>
+                                <h4 class="text-5xl md:text-7xl font-black uppercase mb-8" data-sd-id="198">RESULTS + CLOSING</h4>
+                                <p class="text-2xl font-black italic uppercase" data-sd-id="199">WINNERS ANNOUNCED. PRIZES PRESENTED. VENUE CLEARANCE.</p>
+                                <iconify-icon icon="mdi:grass" class="absolute -bottom-8 -right-8 text-8xl text-[#84cc16]"></iconify-icon>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 8. PROBLEMS SECTION -->
+    <section id="problems" class="bg-white text-black py-32 px-8 md:px-16" data-sd-id="200">
+        <div class="max-w-7xl mx-auto text-center" data-sd-id="201">
+            <h2 class="text-5xl md:text-7xl font-black uppercase mb-6 tracking-tighter snappy-show" data-sd-id="202">YOU DON'T GET TO KNOW THE PROBLEM YET.</h2>
+            <p class="text-2xl md:text-4xl italic font-black mb-24 snappy-show" data-sd-id="203">AND THAT'S THE POINT.</p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16 snappy-show" data-sd-id="204">
+                <div class="locked-stripes h-80 flex flex-col items-center justify-center border-4 border-black p-8 text-white" data-sd-id="205">
+                    <span class="mono text-xs mb-4" data-sd-id="206">PROBLEM #01</span>
+                    <div class="text-4xl font-black px-2 mb-4" data-sd-id="207">████████████</div>
+                    <span class="mono text-xs opacity-40" data-sd-id="208">STATUS: LOCKED</span>
+                </div>
+                <div class="locked-stripes h-80 flex flex-col items-center justify-center border-4 border-black p-8 text-white" data-sd-id="209">
+                    <span class="mono text-xs mb-4" data-sd-id="210">PROBLEM #02</span>
+                    <div class="text-4xl font-black px-2 mb-4" data-sd-id="211">████████████</div>
+                    <span class="mono text-xs opacity-40" data-sd-id="212">STATUS: LOCKED</span>
+                </div>
+                <div class="locked-stripes h-80 flex flex-col items-center justify-center border-4 border-black p-8 text-white" data-sd-id="213">
+                    <span class="mono text-xs mb-4" data-sd-id="214">PROBLEM #03</span>
+                    <div class="text-4xl font-black px-2 mb-4" data-sd-id="215">████████████</div>
+                    <span class="mono text-xs opacity-40" data-sd-id="216">STATUS: LOCKED</span>
+                </div>
+            </div>
+            <div class="bg-black text-white p-8 inline-block mono uppercase font-black text-xl snappy-show" data-sd-id="217">REVEALED ON HACKATHON DAY</div>
+        </div>
+    </section>
+
+    
+
+    <!-- 10. SPONSORS SECTION -->
+    <section id="sponsors" class="py-32 bg-[#1a1a1a] px-8 md:px-16">
+        <div class="max-w-7xl mx-auto text-center">
+            <h3 class="text-5xl md:text-7xl font-black uppercase mb-4 tracking-tighter snappy-show">BACKING THE MISSION</h3>
+            <p class="text-xl italic font-black text-industrial-gray mb-20 snappy-show">We're partnering with amazing organizations. Interested in supporting TOUCH GRASS? Get in touch.</p>
+            <div class="grid grid-cols-2 md:grid-cols-6 gap-8 mb-20 snappy-show">
+                <div class="aspect-video border-2 border-industrial-gray opacity-20 flex items-center justify-center font-black italic hover:opacity-100 transition-opacity">LOGO</div>
+                <div class="aspect-video border-2 border-industrial-gray opacity-20 flex items-center justify-center font-black italic hover:opacity-100 transition-opacity">LOGO</div>
+                <div class="aspect-video border-2 border-industrial-gray opacity-20 flex items-center justify-center font-black italic hover:opacity-100 transition-opacity">LOGO</div>
+                <div class="aspect-video border-2 border-industrial-gray opacity-20 flex items-center justify-center font-black italic hover:opacity-100 transition-opacity">LOGO</div>
+                <div class="aspect-video border-2 border-industrial-gray opacity-20 flex items-center justify-center font-black italic hover:opacity-100 transition-opacity">LOGO</div>
+                <div class="aspect-video border-2 border-industrial-gray opacity-20 flex items-center justify-center font-black italic hover:opacity-100 transition-opacity">LOGO</div>
+            </div>
+            <a href="#" id="sponsor-cta-btn" class="btn-brutal text-[#84cc16] border-[#84cc16] hover:bg-[#84cc16] hover:text-black snappy-show">BECOME A SPONSOR →</a>
+        </div>
+    </section>
+
+    <!-- 11. FAQ SECTION -->
+    <section id="faq" class="bg-white text-black py-32 px-8 md:px-16" data-sd-id="240">
+        <div class="max-w-4xl mx-auto" data-sd-id="241">
+            <h3 class="text-5xl md:text-7xl mono uppercase font-black mb-20 tracking-tighter" data-sd-id="242">// INQUIRIES</h3>
+            <div class="space-y-4" data-sd-id="243">
+                <details class="group border-b-4 border-black">
+                    <summary class="list-none py-8 px-4 flex justify-between items-center hover:bg-black hover:text-white transition-all select-none">
+                        <span class="text-2xl md:text-3xl font-black uppercase tracking-tighter">WHO CAN PARTICIPATE?</span>
+                        <iconify-icon icon="lucide:plus" class="text-3xl group-open:rotate-45 transition-transform"></iconify-icon>
+                    </summary>
+                    <div class="p-8 mono text-lg font-bold">School students under 18 can participate in TOUCH GRASS.</div>
+                </details>
+                <details class="group border-b-4 border-black">
+                    <summary class="list-none py-8 px-4 flex justify-between items-center hover:bg-black hover:text-white transition-all select-none">
+                        <span class="text-2xl md:text-3xl font-black uppercase tracking-tighter">HOW MANY PEOPLE CAN BE ON A TEAM?</span>
+                        <iconify-icon icon="lucide:plus" class="text-3xl group-open:rotate-45 transition-transform"></iconify-icon>
+                    </summary>
+                    <div class="p-8 mono text-lg font-bold">Teams can have 1–4 members.</div>
+                </details>
+                <details class="group border-b-4 border-black">
+                    <summary class="list-none py-8 px-4 flex justify-between items-center hover:bg-black hover:text-white transition-all select-none">
+                        <span class="text-2xl md:text-3xl font-black uppercase tracking-tighter">DO WE KNOW THE PROBLEM STATEMENTS BEFOREHAND?</span>
+                        <iconify-icon icon="lucide:plus" class="text-3xl group-open:rotate-45 transition-transform"></iconify-icon>
+                    </summary>
+                    <div class="p-8 mono text-lg font-bold">No. The problem statements will be revealed on the day of the hackathon.</div>
+                </details>
+                <details class="group border-b-4 border-black">
+                    <summary class="list-none py-8 px-4 flex justify-between items-center hover:bg-black hover:text-white transition-all select-none">
+                        <span class="text-2xl md:text-3xl font-black uppercase tracking-tighter">WHAT ARE WE SUPPOSED TO BUILD?</span>
+                        <iconify-icon icon="lucide:plus" class="text-3xl group-open:rotate-45 transition-transform"></iconify-icon>
+                    </summary>
+                    <div class="p-8 mono text-lg font-bold">Participants will create software-based solutions to the problem statement they receive.</div>
+                </details>
+                <details class="group border-b-4 border-black">
+                    <summary class="list-none py-8 px-4 flex justify-between items-center hover:bg-black hover:text-white transition-all select-none">
+                        <span class="text-2xl md:text-3xl font-black uppercase tracking-tighter">HOW MUCH DOES IT COST TO PARTICIPATE?</span>
+                        <iconify-icon icon="lucide:plus" class="text-3xl group-open:rotate-45 transition-transform"></iconify-icon>
+                    </summary>
+                    <div class="p-8 mono text-lg font-bold">Nothing. TOUCH GRASS is completely free to participate in.</div>
+                </details>
+                <details class="group border-b-4 border-black">
+                    <summary class="list-none py-8 px-4 flex justify-between items-center hover:bg-black hover:text-white transition-all select-none">
+                        <span class="text-2xl md:text-3xl font-black uppercase tracking-tighter">DO I NEED TO BRING MY OWN LAPTOP?</span>
+                        <iconify-icon icon="lucide:plus" class="text-3xl group-open:rotate-45 transition-transform"></iconify-icon>
+                    </summary>
+                    <div class="p-8 mono text-lg font-bold">Yes. Participants should bring their own laptop, as teams will be building software solutions during the hackathon.</div>
+                </details>
+            </div>
+        </div>
+    </section>
+
+    <!-- 12. REGISTRATION -->
+    <section id="register" class="py-64 bg-[#84cc16] text-black relative overflow-hidden" data-sd-id="252">
+        <div class="absolute inset-0 grid-pattern opacity-20" data-sd-id="253"></div>
+        <div class="max-w-7xl mx-auto text-center relative z-10" data-sd-id="254">
+            <h2 class="text-[10vw] md:text-[12vw] leading-none font-black italic mb-12 uppercase tracking-tighter snappy-show" data-sd-id="255">READY TO<br>TOUCH GRASS?</h2>
+            <a href="https://docs.google.com/forms/d/e/1FAIpQLScF8G5HjINZx5b4ulPnZ7N5Ly30h4t9xGdVaWk2UocRqsythg/viewform?usp=dialog" target="_blank" rel="noopener noreferrer" id="register-now-cta" class="bg-black text-white px-12 py-8 text-4xl md:text-6xl font-black hover:bg-white hover:text-black transition-all inline-block uppercase snappy-show">REGISTER NOW →</a>
+        </div>
+    </section>
+
+    <!-- 13. FOOTER -->
+    <footer class="bg-black border-t-8 border-white py-20 px-8 md:px-16" data-sd-id="257">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-end gap-16" data-sd-id="258">
+            <div class="space-y-6" data-sd-id="259">
+                <h2 class="text-7xl md:text-9xl font-black italic tracking-tighter opacity-10 leading-none" data-sd-id="260">TOUCH GRASS.</h2>
+                <div class="mono text-xs" data-sd-id="261">
+                    <p class="mb-4" data-sd-id="262">A STUDENT-ORGANIZED HACKATHON AT CM SHRI SURAJMAL VIHAR</p>
+                </div>
+            </div>
+            <div class="flex gap-8 text-4xl" data-sd-id="263">
+                <a href="https://www.instagram.com/touchgrassdelhi/" target="_blank" rel="noopener noreferrer" id="social-instagram-link" aria-label="Instagram"><iconify-icon icon="lucide:instagram" class="hover:text-[#84cc16] transition-all hover:-translate-y-2"></iconify-icon></a>
+            </div>
+        </div>
+    </footer>
+</div>
+
+<script>
+    const cursor = document.getElementById('cursor');
+    const heroTitle = document.getElementById('hero-title');
+    const timelineProgress = document.getElementById('timeline-progress');
+    const journeySteps = document.querySelectorAll('.journey-step');
+
+    document.addEventListener('mousemove', (e) => {
+        cursor.style.left = e.clientX + 'px';
+        cursor.style.top = e.clientY + 'px';
+
+        if (heroTitle) {
+            const rect = heroTitle.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            const deltaX = (e.clientX - centerX) / 40;
+            const deltaY = (e.clientY - centerY) / 40;
+            heroTitle.style.transform = `skew(${deltaX}deg, ${deltaY}deg)`;
+        }
+    });
+
+    // Timeline Progress Logic
+    window.addEventListener('scroll', () => {
+        const schedule = document.getElementById('schedule');
+        if (schedule) {
+            const rect = schedule.getBoundingClientRect();
+            const windowHeight = window.innerHeight;
+            
+            let progress = 0;
+            if (rect.top < windowHeight / 2) {
+                progress = Math.min(100, Math.max(0, ((windowHeight / 2 - rect.top) / rect.height) * 110));
+            }
+            timelineProgress.style.height = progress + '%';
+
+            const stepThresholds = [0, 20, 40, 50, 60, 80, 100];
+            journeySteps.forEach((step, index) => {
+                if (progress >= stepThresholds[index]) {
+                    step.classList.add('active');
+                } else {
+                    step.classList.remove('active');
+                }
+            });
+        }
+    });
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+            }
+        });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.snappy-show').forEach(el => observer.observe(el));
+
+    // Sponsor Modal Logic
+    const sponsorBtn = document.getElementById('sponsor-cta-btn');
+    const sponsorModal = document.getElementById('sponsor-modal');
+    const sponsorModalContent = document.getElementById('sponsor-modal-content');
+    const closeSponsorBtn = document.getElementById('close-sponsor-modal');
+
+    if (sponsorBtn && sponsorModal && closeSponsorBtn) {
+        sponsorBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            sponsorModal.classList.remove('opacity-0', 'pointer-events-none');
+            sponsorModalContent.classList.remove('scale-95');
+        });
+
+        closeSponsorBtn.addEventListener('click', () => {
+            sponsorModal.classList.add('opacity-0', 'pointer-events-none');
+            sponsorModalContent.classList.add('scale-95');
+        });
+
+        sponsorModal.addEventListener('click', (e) => {
+            if (e.target === sponsorModal) {
+                sponsorModal.classList.add('opacity-0', 'pointer-events-none');
+                sponsorModalContent.classList.add('scale-95');
+            }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                sponsorModal.classList.add('opacity-0', 'pointer-events-none');
+                sponsorModalContent.classList.add('scale-95');
+            }
+        });
+    }
+</script>
+
+
+</body></html>
